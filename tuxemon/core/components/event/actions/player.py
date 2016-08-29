@@ -181,7 +181,7 @@ class Player(object):
 
     def add_monster(self, game, action):
         """Adds a monster to the current player's party if there is room. The action parameter
-        must contain a monster name to look up in the monster database.
+        must contain a monster slug to look up in the monster database.
 
         :param game: The main game object that contains all the game's variables.
         :param action: The action (tuple) retrieved from the database that contains the action's
@@ -193,7 +193,7 @@ class Player(object):
         :rtype: None
         :returns: None
 
-        Valid Parameters: monster_name
+        Valid Parameters: monster_slug
 
         **Example:**
 
@@ -221,7 +221,6 @@ class Player(object):
         ...  'hp_modifier': [u'0.9', u'1', u'1.1'],
         ...  'level': 0,
         ...  'menu_sprite': u'resources/gfx/sprites/battle/bulbatux-menu01.png',
-        ...  'monster_id': 1,
         ...  'moves': [],
         ...  'name': u'Bulbatux',
         ...  'special_attack': 9,
@@ -239,10 +238,10 @@ class Player(object):
         ... [<core.components.monster.Monster instance at 0x2d0b3b0>]
 
         """
-        monster_name = action.parameters[0]
+        monster_slug = action.parameters[0]
         monster_level = action.parameters[1]
         current_monster = monster.Monster()
-        current_monster.load_from_db(monster_name)
+        current_monster.load_from_db(monster_slug)
         current_monster.set_level(int(monster_level))
 
         game.player1.add_monster(current_monster)
@@ -278,10 +277,10 @@ class Player(object):
 
         # If the item already exists in the player's inventory, add to its quantity, otherwise
         # just add the item.
-        if item_to_add.name in player.inventory:
-            player.inventory[item_to_add.name]['quantity'] += 1
+        if item_to_add.slug in player.inventory:
+            player.inventory[item_to_add.slug]['quantity'] += 1
         else:
-            player.inventory[item_to_add.name] = {'item': item_to_add, 'quantity': 1}
+            player.inventory[item_to_add.slug] = {'item': item_to_add, 'quantity': 1}
 
 
     def player_face(self, game, action):
@@ -359,3 +358,24 @@ class Player(object):
             return
 
         world.menu_blocking = False
+
+    def remove_monster(self, game, action):
+        """Removes a monster to the current player's party if the monster is there.
+
+        :param game: The main game object that contains all the game's variables.
+        :param action: The action (tuple) retrieved from the database that contains the action's
+            parameters
+
+        :type game: core.control.Control
+        :type action: Tuple
+
+        :rtype: None
+        :returns: None
+
+        Valid Parameters: monster_slug
+        """
+        monster_slug = action.parameters[0]
+
+        monster = game.player1.find_monster(monster_slug)
+        if monster:
+            game.player1.remove_monster(monster)
